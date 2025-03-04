@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instagram Loader</title>
+  <style>
+    .post {
+      margin: 20px;
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+    .post img {
+      max-width: 100%;
+      height: auto;
+    }
+    #loader {
+      display: none;
+      text-align: center;
+      margin: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Instagram Loader</h1>
+  <div id="posts">
+    <% posts.forEach(post => { %>
+      <div class="post">
+        <img src="<%= post.image %>" alt="<%= post.caption %>">
+        <p><%= post.caption %></p>
+      </div>
+    <% }) %>
+  </div>
+  <div id="loader">Loading...</div>
+
+  <script>
+    let offset = 10; // Initial offset
+    const limit = 10; // Number of posts to load at a time
+
+    // Function to load more posts
+    async function loadMorePosts() {
+      const loader = document.getElementById('loader');
+      loader.style.display = 'block';
+
+      const response = await fetch(`/load-more?offset=${offset}&limit=${limit}`);
+      const posts = await response.json();
+
+      if (posts.length > 0) {
+        const postsContainer = document.getElementById('posts');
+        posts.forEach(post => {
+          const postElement = document.createElement('div');
+          postElement.className = 'post';
+          postElement.innerHTML = `
+            <img src="${post.image}" alt="${post.caption}">
+            <p>${post.caption}</p>
+          `;
+          postsContainer.appendChild(postElement);
+        });
+        offset += limit;
+      }
+
+      loader.style.display = 'none';
+    }
+
+    // Load more posts when the user scrolls to the bottom
+    window.addEventListener('scroll', () => {
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+        loadMorePosts();
+      }
+    });
+  </script>
+</body>
+</html>
